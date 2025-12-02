@@ -1,6 +1,6 @@
 {
-  "name": "wxt-react-starter",
-  "description": "manifest.json description",
+  "name": "@firstlines/extension",
+  "description": "FirstLines extension",
   "private": true,
   "version": "0.0.0",
   "type": "module",

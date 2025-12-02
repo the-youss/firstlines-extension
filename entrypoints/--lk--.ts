@@ -40,7 +40,7 @@ function init() {
         }
         window.postMessage(
           {
-            type: EVENT_NAME.SL_LINKEDIN_API_REQUEST,
+            type: EVENT_NAME.LINKEDIN_API_REQUEST,
             url: this._url,
             method: this._method,
             body: parsedBody,

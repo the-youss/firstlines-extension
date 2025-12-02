@@ -20,7 +20,7 @@ export default defineContentScript({
 async function main(ctx: ContentScriptContext) {
 	window.addEventListener("message", (event) => {
 		if (event.source !== window) return; // only accept messages from page
-		if (event.data?.type === EVENT_NAME.SL_LINKEDIN_API_REQUEST) {
+		if (event.data?.type === EVENT_NAME.LINKEDIN_API_REQUEST) {
 			const data = event.data;
 			storageFn.save('__FL_LK__REQUEST', data);
 		}
