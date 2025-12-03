@@ -26,4 +26,5 @@ export default defineConfig({
     description: 'Test',
   },
   modules: ['@wxt-dev/module-react'],
+
 });

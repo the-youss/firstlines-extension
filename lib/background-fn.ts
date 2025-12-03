@@ -2,6 +2,7 @@ import { LinkedinCookies } from "@/models/LinkedinCookies"
 import { getCookies } from "./cookie"
 import { storageFn } from "./storage"
 import { StartExtractionProps } from "@/models/StartExtractionProps";
+import { api } from "./api";
 export const getLinkedinCookies = async (): Promise<LinkedinCookies> => {
   const cookies = await getCookies("https://www.linkedin.com", [
     "li_a",
@@ -23,6 +24,14 @@ export const exportSearchLeads = async () => {
   if (!obj.cookies || !obj.headers || !obj.url) {
     throw new Error('Something went wrong, please refresh the page and try again')
   }
-  console.log(obj)
+  try {
+    const res = await api.createPayload(obj);
+    const identifier =  res.result.data.identifier
+    const url = `https://app.firstlines.ai/ext/${identifier}`;
+    browser.tabs.create({ url });
+  } catch (error:any) {
+    console.log(error)
+     throw new Error(error.message)
+  }
 }
 
