@@ -17,11 +17,18 @@ export const SalesNavLead = () => {
   )
 }
 
-export const SALES_NAV_SEARCH_SELECTOR = '.lists-nav > div:nth-last-child(1)'
+const SALES_NAV_LEAD_SELECTOR = '#profile-card-section div[class*=_cta-container_]'
+const isSalesNavProfilePage = () =>
+  /^\/sales\/lead\//.test(window.location.pathname);
+const isSalesNavSearchResultsPage = () =>
+  /^\/sales\/search\/people/.test(window.location.pathname);
 
 
 export const injectSalesNavLead = async (ctx: ContentScriptContext) => {
-  const anchorEl = await waitFor(SALES_NAV_SEARCH_SELECTOR);
+  if (!isSalesNavProfilePage() && !isSalesNavSearchResultsPage()) {
+    return;
+  }
+  const anchorEl = await waitFor(SALES_NAV_LEAD_SELECTOR);
   const ui = await createShadowRootUi(ctx, {
     name: "fl-button",
     position: 'inline',

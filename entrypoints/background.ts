@@ -1,4 +1,5 @@
-import { exportSearchLeads } from "@/lib/background-fn";
+import { exportSearchLeads, getLinkedinCookies } from "@/lib/background-fn";
+import { Message } from "@/lib/message";
 import { storageFn } from "@/lib/storage";
 import { urlsToWatch } from "@/lib/utils";
 
@@ -6,8 +7,11 @@ export default defineBackground(() => {
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const MESSAGE_TYPE = (message as { type: string }).type;
     console.log('MESSAGE_TYPE', MESSAGE_TYPE);
-    if (MESSAGE_TYPE === 'export-search-leads') {
-      exportSearchLeads().then(sendResponse)
+    if (MESSAGE_TYPE === Message.exportSearchLeads) {
+      exportSearchLeads().then(sendResponse).catch((error) => sendResponse({ error: error.message }))
+    }
+    if (MESSAGE_TYPE === Message.getLinkedinCookies) {
+      getLinkedinCookies().then(sendResponse)
     }
 
     return true;

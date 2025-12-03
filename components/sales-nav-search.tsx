@@ -1,26 +1,43 @@
 import '@/assets/shadcn.css';
+import { Message } from '@/lib/message';
 import { waitFor } from "@/lib/utils";
 import ReactDOM from "react-dom/client";
+import { Fragment } from 'react/jsx-runtime';
 import { ContentScriptContext } from "wxt/client";
 import { Button } from "./ui/button";
 
 export const SalesNavSearch = () => {
-  const _onClick = useCallback(() => {
-    browser.runtime.sendMessage({
-      type: 'export-search-leads',
-    })
+  const _onClick = useCallback(async () => {
+    try {
+      const res = await browser.runtime.sendMessage({
+        type: Message.exportSearchLeads,
+      })
+      if (res instanceof Object && 'error' in res) {
+        throw new Error(res.error as string)
+      }
+    } catch (error: any) {
+      console.error(error)
+      alert(error.message)
+    }
   }, [])
   return (
-    <Button onClick={_onClick}>
-      Export leads
-    </Button>
+    <Fragment>
+      <Button onClick={_onClick}>
+        Export leads
+      </Button>
+    </Fragment>
   )
 }
 
-export const SALES_NAV_SEARCH_SELECTOR = 'div[class*=_sticky-nav] > div'
+const SALES_NAV_SEARCH_SELECTOR = 'div[class*=_sticky-nav] > div'
 
+const isSalesNavSearchResultsPage = () =>
+  /^\/sales\/search\/people/.test(window.location.pathname);
 
 export const injectSalesNavSearch = async (ctx: ContentScriptContext) => {
+  if (!isSalesNavSearchResultsPage()) {
+    return;
+  }
   const anchorEl = await waitFor(SALES_NAV_SEARCH_SELECTOR);
   const existingUIs = document.querySelectorAll('fl-sales-nav-search');
   existingUIs.forEach((ui) => ui.remove());
@@ -46,3 +63,5 @@ export const injectSalesNavSearch = async (ctx: ContentScriptContext) => {
   })
   ui.mount();
 }
+
+
