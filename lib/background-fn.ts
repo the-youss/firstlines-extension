@@ -3,6 +3,7 @@ import { getCookies } from "./cookie"
 import { storageFn } from "./storage"
 import { StartExtractionProps } from "@/models/StartExtractionProps";
 import { api } from "./api";
+import { APP_URL } from "./config";
 export const getLinkedinCookies = async (): Promise<LinkedinCookies> => {
   const cookies = await getCookies("https://www.linkedin.com", [
     "li_a",
@@ -26,12 +27,30 @@ export const exportSearchLeads = async () => {
   }
   try {
     const res = await api.createPayload(obj);
-    const identifier =  res.result.data.identifier
-    const url = `https://app.firstlines.ai/ext/${identifier}`;
+    const identifier = res.result.data.identifier
+    const url = `${APP_URL}/app/ext/${identifier}`;
     browser.tabs.create({ url });
-  } catch (error:any) {
+  } catch (error: any) {
     console.log(error)
-     throw new Error(error.message)
+    throw new Error(error.message)
   }
 }
 
+export const syncLinkedinSession = async () => {
+  const cookies = await getLinkedinCookies()
+  const LK__REQUEST_HEADERS = await storageFn.get<{ headers: Array<{ name: string, value: string }> }>('__FL_LK__REQUEST_HEADERS')
+
+  const obj: Pick<StartExtractionProps, 'cookies' | 'headers'> = {
+    cookies,
+    headers: LK__REQUEST_HEADERS.headers,
+  };
+  if (!obj.cookies || !obj.headers) {
+    throw new Error('Something went wrong, please refresh the page and try again')
+  }
+  try {
+    console.log('[syncLinkedinSession]', obj)
+    await api.syncLinkedinSession(obj);
+  } catch (error: any) {
+    throw new Error(error.message)
+  }
+}

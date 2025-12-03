@@ -4,6 +4,11 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   manifestVersion: 3,
   manifest: {
+    host_permissions: [
+      "*://*.linkedin.com/*",
+      "*://*.firstlines.ai/*",
+      "*://localhost/"
+    ],
     web_accessible_resources: [
       {
         resources: ["--lk--.js"],

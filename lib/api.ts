@@ -1,5 +1,20 @@
 import { StartExtractionProps } from "@/models/StartExtractionProps";
-import ky, { ResponsePromise, isHTTPError, isKyError } from 'ky';
+import ky, { ResponsePromise, isHTTPError } from 'ky';
+import { APP_URL } from "./config";
+import { getCookie, getCookies } from "./cookie";
+
+
+const APP_SESSION_COOKIE_NAME = "better-auth.session_token";
+const APP_SESSION_COOKIE_NAME_SECURE = "__Secure-better-auth.session_token";
+
+export const getAppSessionTokenValue = async () => {
+  return (
+    (await getCookie(APP_URL, APP_SESSION_COOKIE_NAME)) ||
+    (await getCookie(APP_URL, APP_SESSION_COOKIE_NAME_SECURE))
+  );
+};
+
+export const getAppSessionTokenName = () => APP_SESSION_COOKIE_NAME;
 
 type Result<T> = {
   "result": {
@@ -7,8 +22,13 @@ type Result<T> = {
   }
 }
 
-const fetch = ky.create({
-  prefixUrl: 'http://localhost:3000/api/trpc',
+const _fetch = ky.create({
+  prefixUrl: `${APP_URL}/api/trpc`,
+  fetch: async (url, options) => {
+    const headers = new Headers(options?.headers)
+    headers.set('content-type', 'application/json')
+    return fetch(url, { ...options, headers });
+  }
 })
 
 
@@ -30,11 +50,17 @@ export const api = {
   createPayload: async (obj: StartExtractionProps) => {
     const res = await catchError<{
       "identifier": string
-    }>(() => fetch('extension.createPayload', {
+    }>(() => _fetch('extension.createPayload', {
+      method: 'POST',
+      json: { payload: obj },
+    }))
+    return res
+  },
+  syncLinkedinSession: async (obj: Pick<StartExtractionProps, 'cookies' | 'headers'>) => {
+    await catchError<null>(() => _fetch('extension.syncLinkedinSession', {
       method: 'POST',
       json: obj,
     }))
-    return res
   }
 }
 

@@ -1,5 +1,6 @@
 import { injectSalesNavLead } from '@/components/sales-nav-lead';
 import { injectSalesNavSearch } from '@/components/sales-nav-search';
+import { injectSyncCookie } from '@/components/sync-cookie';
 import { EVENT_NAME } from '@/lib/event.name';
 import { storageFn } from '@/lib/storage';
 import { ContentScriptContext } from 'wxt/client';
@@ -27,6 +28,7 @@ async function main(ctx: ContentScriptContext) {
 	})
 
 	await injectSalesNavSearch(ctx);
+	await injectSyncCookie(ctx);
 	// await injectSalesNavLead(ctx)
 
 
@@ -38,6 +40,7 @@ async function main(ctx: ContentScriptContext) {
 			setTimeout(async () => {
 				console.log("🔄 URL changed:", lastUrl);
 				await injectSalesNavSearch(ctx);
+				await injectSyncCookie(ctx);
 				// await injectSalesNavLead(ctx)
 			}, 250);
 		}

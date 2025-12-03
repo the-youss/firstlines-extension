@@ -7,8 +7,10 @@ import { ContentScriptContext } from "wxt/client";
 import { Button } from "./ui/button";
 
 export const SalesNavSearch = () => {
+  const [isLoading, setIsLoading] = useState(false)
   const _onClick = useCallback(async () => {
     try {
+      setIsLoading(true)
       const res = await browser.runtime.sendMessage({
         type: Message.exportSearchLeads,
       })
@@ -18,12 +20,14 @@ export const SalesNavSearch = () => {
     } catch (error: any) {
       console.error(error)
       alert(error.message)
+    } finally {
+      setIsLoading(false)
     }
   }, [])
   return (
     <Fragment>
-      <Button onClick={_onClick}>
-        Export leads
+      <Button onClick={_onClick} disabled={isLoading}>
+        {isLoading ? 'Please wait...' : 'Export leads'}
       </Button>
     </Fragment>
   )

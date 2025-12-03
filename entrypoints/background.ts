@@ -1,4 +1,4 @@
-import { exportSearchLeads, getLinkedinCookies } from "@/lib/background-fn";
+import { exportSearchLeads, getLinkedinCookies, syncLinkedinSession } from "@/lib/background-fn";
 import { Message } from "@/lib/message";
 import { storageFn } from "@/lib/storage";
 import { urlsToWatch } from "@/lib/utils";
@@ -12,6 +12,9 @@ export default defineBackground(() => {
     }
     if (MESSAGE_TYPE === Message.getLinkedinCookies) {
       getLinkedinCookies().then(sendResponse)
+    }
+    if (MESSAGE_TYPE === Message.syncLinkedinSession) {
+      syncLinkedinSession().then(sendResponse).catch((error) => sendResponse({ error: error.message }))
     }
 
     return true;
