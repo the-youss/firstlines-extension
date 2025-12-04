@@ -11,11 +11,13 @@ const SYNC_COOKIE_INTERVAL = 30 * 60 * 1000; // 30 minutes in ms
 export const SyncCookie = () => {
   useEffect(() => {
     const run = async () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const isFromApp = searchParams.get('from') === 'fl_lk_status_check';
       const now = Date.now()
       const stored = await storageFn.get('__FL_LK__LAST_SYNC_TIME');
       const lastSyncTime = stored ? Number(stored) : 0;
-      console.log('[sync]', new Date(now).toLocaleString())
-      const shouldSync = now - lastSyncTime >= SYNC_COOKIE_INTERVAL;
+      console.log('[sync]', new Date(now).toLocaleString(),)
+      const shouldSync = isFromApp ? true : now - lastSyncTime >= SYNC_COOKIE_INTERVAL;
       if (!shouldSync) return;
       try {
         await browser.runtime.sendMessage({
@@ -25,6 +27,10 @@ export const SyncCookie = () => {
         console.error('[sync error]', error);
       } finally {
         await storageFn.save('__FL_LK__LAST_SYNC_TIME', now.toString());
+        if (isFromApp) {
+          alert(`LinkedIn session synced successfully!`)
+          window.close()
+        }
       }
     }
     run();
