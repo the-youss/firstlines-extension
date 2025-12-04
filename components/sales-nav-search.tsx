@@ -27,7 +27,7 @@ export const SalesNavSearch = () => {
   return (
     <Fragment>
       <Button onClick={_onClick} disabled={isLoading}>
-        {isLoading ? 'Please wait...' : 'Export leads'}
+        {isLoading ? 'Please wait...' : 'Import leads'}
       </Button>
     </Fragment>
   )

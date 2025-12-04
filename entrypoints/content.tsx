@@ -27,9 +27,9 @@ async function main(ctx: ContentScriptContext) {
 		}
 	})
 
-	await injectSalesNavSearch(ctx);
-	await injectSyncCookie(ctx);
-	// await injectSalesNavLead(ctx)
+	// await injectSalesNavSearch(ctx);
+	// await injectSyncCookie(ctx);
+	await injectSalesNavLead(ctx)
 
 
 	let lastUrl = location.href;
@@ -39,9 +39,9 @@ async function main(ctx: ContentScriptContext) {
 			lastUrl = location.href;
 			setTimeout(async () => {
 				console.log("🔄 URL changed:", lastUrl);
-				await injectSalesNavSearch(ctx);
-				await injectSyncCookie(ctx);
-				// await injectSalesNavLead(ctx)
+				// await injectSalesNavSearch(ctx);
+				// await injectSyncCookie(ctx);
+				await injectSalesNavLead(ctx)
 			}, 250);
 		}
 	});
