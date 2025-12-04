@@ -39,7 +39,7 @@
 		--font-sans: var(--font-sans);
 		--font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
 		--font-mono: var(--font-mono);
-		--radius: 0.5rem;
+		--radius: 0.225rem;
 		--shadow-x: 0px;
 		--shadow-y: 2px;
 		--shadow-blur: 0.25rem;
@@ -99,27 +99,28 @@
 		--font-sans: var(--font-sans);
 		--font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
 		--font-mono: var(--font-mono);
-		--radius: 0.5rem;
+		--radius: 0.225rem;
 		--shadow-x: 0px;
 		--shadow-y: 2px;
 		--shadow-blur: 0.25rem;
 		--shadow-spread: 0;
-		--shadow-opacity: 0.3;
+		--shadow-opacity: 0.1;
 		--shadow-color: #000000;
-		--shadow-2xs: 0px 2px 0.25rem 0 hsl(0 0% 0% / 0.15);
-		--shadow-xs: 0px 2px 0.25rem 0 hsl(0 0% 0% / 0.15);
-		--shadow-sm: 0px 2px 0.25rem 0 hsl(0 0% 0% / 0.3),
-			0px 1px 2px -1px hsl(0 0% 0% / 0.3);
-		--shadow: 0px 2px 0.25rem 0 hsl(0 0% 0% / 0.3),
-			0px 1px 2px -1px hsl(0 0% 0% / 0.3);
-		--shadow-md: 0px 2px 0.25rem 0 hsl(0 0% 0% / 0.3),
-			0px 2px 4px -1px hsl(0 0% 0% / 0.3);
-		--shadow-lg: 0px 2px 0.25rem 0 hsl(0 0% 0% / 0.3),
-			0px 4px 6px -1px hsl(0 0% 0% / 0.3);
-		--shadow-xl: 0px 2px 0.25rem 0 hsl(0 0% 0% / 0.3),
-			0px 8px 10px -1px hsl(0 0% 0% / 0.3);
-		--shadow-2xl: 0px 2px 0.25rem 0 hsl(0 0% 0% / 0.75);
+		--shadow-2xs: 0px 2px 0.25rem 0 hsl(0 0% 0% / 0.05);
+		--shadow-xs: 0px 2px 0.25rem 0 hsl(0 0% 0% / 0.05);
+		--shadow-sm: 0px 2px 0.25rem 0 hsl(0 0% 0% / 0.1),
+			0px 1px 2px -1px hsl(0 0% 0% / 0.1);
+		--shadow: 0px 2px 0.25rem 0 hsl(0 0% 0% / 0.1),
+			0px 1px 2px -1px hsl(0 0% 0% / 0.1);
+		--shadow-md: 0px 2px 0.25rem 0 hsl(0 0% 0% / 0.1),
+			0px 2px 4px -1px hsl(0 0% 0% / 0.1);
+		--shadow-lg: 0px 2px 0.25rem 0 hsl(0 0% 0% / 0.1),
+			0px 4px 6px -1px hsl(0 0% 0% / 0.1);
+		--shadow-xl: 0px 2px 0.25rem 0 hsl(0 0% 0% / 0.1),
+			0px 8px 10px -1px hsl(0 0% 0% / 0.1);
+		--shadow-2xl: 0px 2px 0.25rem 0 hsl(0 0% 0% / 0.25);
 	}
+
 }
 
 @layer base {

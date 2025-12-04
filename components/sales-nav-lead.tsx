@@ -3,17 +3,47 @@ import { waitFor } from "@/lib/utils";
 import ReactDOM from "react-dom/client";
 import { ContentScriptContext } from "wxt/client";
 import { Button } from "./ui/button";
-
-export const SalesNavLead = () => {
+import { ComboBox } from './ui/combo-box';
+const options = [
+  {
+    value: "backlog",
+    label: "Backlog",
+  },
+  {
+    value: "todo",
+    label: "Todo",
+  },
+  {
+    value: "in progress",
+    label: "In Progress",
+  },
+  {
+    value: "done",
+    label: "Done",
+  },
+  {
+    value: "canceled",
+    label: "Canceled",
+  },
+]
+export const SalesNavLead = ({ container }: { container: Element }) => {
   const _onClick = useCallback(() => {
     browser.runtime.sendMessage({
       type: 'export-leads',
     })
   }, [])
+  const salesNavLeadEl = document.querySelector('fl-sales-nav-lead');
+  const shadowRoot = salesNavLeadEl?.shadowRoot;
+  console.log('shadowRootshadowRootshadowRoot', shadowRoot)
   return (
-    <Button onClick={_onClick}>
-      Import lead
-    </Button>
+    <ComboBox options={options} shadowRoot={shadowRoot!}>
+      {({ selectedOption }) => (
+        <Button onClick={_onClick}>
+          Import lead
+        </Button>
+      )}
+    </ComboBox>
+
   )
 }
 const SELECTOR_SALES_NAV_SEARCH_RESULTS_PROFILE_CONTAINER = "#inline-sidesheet-outlet";
@@ -55,10 +85,11 @@ export const injectSalesNavLead = async (ctx: ContentScriptContext) => {
         const appContainer = document.createElement("div");
         appContainer.id = "fl_sales_nav_lead_root";
         appContainer.style.marginRight = "12px";
+        appContainer.style.position = "relative";
         container.appendChild(appContainer);
 
         const root = ReactDOM.createRoot(appContainer);
-        root.render(<SalesNavLead />);
+        root.render(<SalesNavLead container={anchorEl.parentElement!} />);
         return root;
       },
       onRemove(root) {
