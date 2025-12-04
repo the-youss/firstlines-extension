@@ -2,6 +2,7 @@ import '@/assets/shadcn.css';
 import ReactDOM from "react-dom/client";
 import { ContentScriptContext } from "wxt/client";
 import { ComboBox } from './ui/combo-box';
+import { waitFor } from '@/lib/utils';
 const options = [
   {
     value: "backlog",
@@ -50,40 +51,47 @@ const isLinkedinProfileNamePage = () => /^\/feed/.test(window.location.pathname)
 
 const tag = 'fl-lk-name'
 
-export const injectLinkedinName = async (ctx: ContentScriptContext, node?: HTMLElement) => {
-
-
+const _injectLinkedinName = async (ctx: ContentScriptContext, node?: HTMLElement[]) => {
   if (!isLinkedinProfileNamePage()) return;
+  console.log('[injectLinkedinName] called')
+  await waitFor(SELECTOR, true);
+  const elements = node ?? Array.from(document.querySelectorAll(SELECTOR));
+  console.log('elements', elements)
+  for (const element of elements) {
+    if (!element) return;
 
+    // 🔥 Prevent duplicate injection
+    if (element.dataset.lkInjected === "true") {
+      return;
+    }
+    const ui = await createShadowRootUi(ctx, {
+      position: "inline",
+      name: tag,
+      anchor: element,
+      onMount(container) {
+        const appContainer = document.createElement("span");
+        appContainer.id = "fl_lk_name_root";
+        container.appendChild(appContainer);
 
-  const element = node ?? document.querySelector(SELECTOR);
-  console.log('elements', element)
-  if (element?.querySelector(tag)) {
-    return
+        const root = ReactDOM.createRoot(appContainer);
+        root.render(<LinkedinProfileName container={appContainer} />);
+        return root;
+      },
+      onRemove(root) {
+        root?.unmount();
+      },
+    });
+
+    ui.mount();
+
+    element.dataset.lkInjected = "true";
   }
-  const ui = await createShadowRootUi(ctx, {
-    position: "inline",
-    name: 'fl-lk-name',
-    anchor: element,
-    onMount(container) {
-      const appContainer = document.createElement("span");
-      appContainer.id = "fl_lk_name_root";
-      container.appendChild(appContainer);
 
-      const root = ReactDOM.createRoot(appContainer);
-      root.render(<LinkedinProfileName container={appContainer} />);
-      return root;
-    },
-    onRemove(root) {
-      root?.unmount();
-    },
-  });
-
-  ui.mount();
 };
 
-export function injectLinkedinNameObs(ctx: ContentScriptContext) {
+function injectLinkedinNameObs(ctx: ContentScriptContext) {
   if (!isLinkedinProfileNamePage()) return;
+
 
   const el = document.querySelector(OBSERVER_SELECTOR);
   if (!el) return;
@@ -94,17 +102,9 @@ export function injectLinkedinNameObs(ctx: ContentScriptContext) {
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
         if (!(node instanceof HTMLElement)) continue;
-
-        // 1️⃣ The new node matches the selector
         if (node.matches?.(SELECTOR)) {
-          injectLinkedinName(ctx, node)
+          _injectLinkedinName(ctx, [node])
         }
-
-        // 2️⃣ Or it contains matching children
-        const matches = node.querySelectorAll?.(SELECTOR);
-        matches?.forEach((matchEl) => {
-          injectLinkedinName(ctx, matchEl as HTMLElement)
-        });
       }
     }
   });
@@ -113,4 +113,10 @@ export function injectLinkedinNameObs(ctx: ContentScriptContext) {
     childList: true,
     subtree: true,
   });
+}
+
+
+export async function injectLinkedinName(ctx: ContentScriptContext) {
+  await _injectLinkedinName(ctx)
+  injectLinkedinNameObs(ctx)
 }

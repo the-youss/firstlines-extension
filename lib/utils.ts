@@ -36,13 +36,18 @@ export const urlsToWatch = ["salesApiPeopleSearch", "salesApiLeadSearch"];
 
 // Helper
 export function waitFor(selector: string, all?: boolean): Promise<Element | NodeListOf<Element>> {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
+    setTimeout(reject, 5000)
     const el = all === true ? document.querySelectorAll(selector) : document.querySelector(selector);
-    if (el) return resolve(el);
+    console.log('el', el, el && (all ? (el as NodeListOf<Element>).length > 0 : true))
+    if (el && (all ? (el as NodeListOf<Element>).length > 0 : true)) {
+      return resolve(el);
+    }
 
     const obs = new MutationObserver(() => {
       const el = all === true ? document.querySelectorAll(selector) : document.querySelector(selector);
-      if (el) {
+      console.log("el", el, el && (all ? (el as NodeListOf<Element>).length > 0 : true))
+      if (el && (all ? (el as NodeListOf<Element>).length > 0 : true)) {
         obs.disconnect();
         resolve(el);
       }

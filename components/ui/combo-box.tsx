@@ -42,7 +42,7 @@ export function ComboBox({ children, options, shadowRoot }: ComboBoxProps) {
       <PopoverTrigger asChild>
         {children({ selectedOption: selected })}
       </PopoverTrigger>
-      <PopoverContent container={shadowRoot} className="p-0" side="right" align="start" >
+      <PopoverContent container={shadowRoot} className="p-0" side="bottom" align="start" >
         <Command>
           <CommandInput placeholder="Change status..." />
           <CommandList>

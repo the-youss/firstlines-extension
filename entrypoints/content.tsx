@@ -1,15 +1,14 @@
-import { injectLinkedinName, injectLinkedinNameObs } from '@/components/linkedin-profile-name';
-import { injectSalesNavLead } from '@/components/sales-nav-lead';
-import { injectSalesNavSearch } from '@/components/sales-nav-search';
-import { injectSyncCookie } from '@/components/sync-cookie';
+import { injectLinkedinName } from '@/components/linkedin-profile-name';
+import { injectLinkedinProfile } from '@/components/linkedin-profile';
 import { EVENT_NAME } from '@/lib/event.name';
 import { storageFn } from '@/lib/storage';
 import { ContentScriptContext } from 'wxt/client';
+import { injectLinkedinSearch } from '@/components/linkedin-search';
 
-
+declare var navigation: any;
 export default defineContentScript({
 	matches: ['*://*.linkedin.com/*'],
-	runAt: 'document_end',
+	runAt: 'document_idle',
 	cssInjectionMode: 'ui',
 	async main(ctx) {
 		injectGlobalCss()
@@ -33,25 +32,27 @@ async function main(ctx: ContentScriptContext) {
 	// await injectSalesNavSearch(ctx);
 	// await injectSyncCookie(ctx);
 	// await injectSalesNavLead(ctx)
-	await injectLinkedinName(ctx)
-	injectLinkedinNameObs(ctx)
-	let lastUrl = location.href;
+	injectLinkedinName(ctx);
+	injectLinkedinProfile(ctx)
+	injectLinkedinSearch(ctx)
 
-	const observer = new MutationObserver(() => {
-		if (location.href !== lastUrl) {
-			lastUrl = location.href;
-			setTimeout(async () => {
-				console.log("🔄 URL changed:", lastUrl);
+
+	let lastUrl = location.href;
+	navigation.addEventListener("navigatesuccess", () => {
+		setTimeout(() => {
+			if (lastUrl !== location.href) {
+				console.log("🔄 URL changed:", lastUrl, location.href);
+				lastUrl = location.href;
 				// await injectSalesNavSearch(ctx);
 				// await injectSyncCookie(ctx);
 				// await injectSalesNavLead(ctx)
-				await injectLinkedinName(ctx)
-				injectLinkedinNameObs(ctx)
-			}, 250);
-		}
+				injectLinkedinName(ctx)
+				injectLinkedinProfile(ctx)
+				injectLinkedinSearch(ctx)
+			}
+		}, 250);
 	});
 
-	observer.observe(document, { subtree: true, childList: true });
 }
 
 
