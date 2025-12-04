@@ -30,19 +30,19 @@ type Option = {
 }
 interface ComboBoxProps {
   options: Array<Option>;
-  shadowRoot?: ShadowRoot | Element;
+  shadowRoot?: ShadowRoot | HTMLElement;
   children: ({ selectedOption }: { selectedOption?: Option }) => React.ReactNode
 }
 export function ComboBox({ children, options, shadowRoot }: ComboBoxProps) {
   const [open, setOpen] = React.useState(false)
   const [selected, setSelected] = React.useState<Option>()
-  const portalContainer = shadowRoot ?? document.body
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         {children({ selectedOption: selected })}
       </PopoverTrigger>
-      <PopoverContent container={portalContainer} className="p-0" side="right" align="start" >
+      <PopoverContent container={shadowRoot} className="p-0" side="right" align="start" >
         <Command>
           <CommandInput placeholder="Change status..." />
           <CommandList>

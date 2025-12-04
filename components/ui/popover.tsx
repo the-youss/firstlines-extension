@@ -7,10 +7,10 @@ const PopoverTrigger = PopoverPrimitive.Trigger;
 
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & { container?: Element | ShadowRoot }
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & { container?: HTMLElement | ShadowRoot }
 >(({ className, align = "start", sideOffset = 4, container, ...props }, ref) => {
   // Use the trigger's parent as portal if no container provided
-  const portalContainer = document.body;
+  const portalContainer = container ?? document.body;
   if (portalContainer instanceof Element && portalContainer.style.position === "") {
     portalContainer.style.position = "relative";
   }

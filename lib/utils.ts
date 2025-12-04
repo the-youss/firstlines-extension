@@ -35,13 +35,13 @@ export const createElement = (container: HTMLElement, id: string) => {
 export const urlsToWatch = ["salesApiPeopleSearch", "salesApiLeadSearch"];
 
 // Helper
-export function waitFor(selector: string): Promise<Element> {
+export function waitFor(selector: string, all?: boolean): Promise<Element | NodeListOf<Element>> {
   return new Promise(resolve => {
-    const el = document.querySelector(selector);
+    const el = all === true ? document.querySelectorAll(selector) : document.querySelector(selector);
     if (el) return resolve(el);
 
     const obs = new MutationObserver(() => {
-      const el = document.querySelector(selector);
+      const el = all === true ? document.querySelectorAll(selector) : document.querySelector(selector);
       if (el) {
         obs.disconnect();
         resolve(el);

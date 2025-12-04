@@ -26,17 +26,19 @@ const options = [
     label: "Canceled",
   },
 ]
-export const SalesNavLead = ({ container }: { container: Element }) => {
+export const SalesNavLead = ({ container }: { container: HTMLElement }) => {
   const _onClick = useCallback(() => {
     browser.runtime.sendMessage({
       type: 'export-leads',
     })
   }, [])
-  const salesNavLeadEl = document.querySelector('fl-sales-nav-lead');
-  const shadowRoot = salesNavLeadEl?.shadowRoot;
-  console.log('shadowRootshadowRootshadowRoot', shadowRoot)
+  const salesNavLeadEl = document.querySelector('fl-sales-nav-lead') as HTMLElement;
+  const shadowRoot = container?.shadowRoot;
+  console.log('shadowRoot', container)
+
+
   return (
-    <ComboBox options={options} shadowRoot={shadowRoot!}>
+    <ComboBox options={options} shadowRoot={container!}>
       {({ selectedOption }) => (
         <Button onClick={_onClick}>
           Import lead
@@ -48,6 +50,7 @@ export const SalesNavLead = ({ container }: { container: Element }) => {
 }
 const SELECTOR_SALES_NAV_SEARCH_RESULTS_PROFILE_CONTAINER = "#inline-sidesheet-outlet";
 const SALES_NAV_LEAD_SELECTOR = '#profile-card-section div[class*=_cta-container_]'
+
 let mutationOnCtaContainerObserver: MutationObserver | undefined;
 let mutationOnSearchResultsProfilecontainerObserver:
   | MutationObserver
@@ -71,6 +74,7 @@ export const injectSalesNavLead = async (ctx: ContentScriptContext) => {
   isInjectingSalesNavLead = true;
   try {
     const anchorEl = await waitFor(SALES_NAV_LEAD_SELECTOR);
+    console.log('anchorEl', anchorEl)
 
     // double-check before inserting
     if (document.querySelector(tag)) return;
@@ -89,7 +93,7 @@ export const injectSalesNavLead = async (ctx: ContentScriptContext) => {
         container.appendChild(appContainer);
 
         const root = ReactDOM.createRoot(appContainer);
-        root.render(<SalesNavLead container={anchorEl.parentElement!} />);
+        root.render(<SalesNavLead container={appContainer} />);
         return root;
       },
       onRemove(root) {

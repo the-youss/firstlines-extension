@@ -14,10 +14,10 @@ export default defineConfig({
         resources: ["--lk--.js"],
         matches: ["*://*.linkedin.com/*"]
       },
-      // {
-      //   resources: ["content.css"],
-      //   matches: ["*://*.linkedin.com/*"]
-      // },
+      {
+        resources: ["assets/global.css"],
+        matches: ["*://*.linkedin.com/*"]
+      },
     ],
     permissions: [
       "activeTab",
