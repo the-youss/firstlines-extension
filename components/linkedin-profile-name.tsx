@@ -100,7 +100,7 @@ export function injectLinkedinNameObs(ctx: ContentScriptContext) {
       obs = new MutationObserver(() => {
         console.log('detected')
         // We only re-inject if UI is gone
-        setTimeout(() => injectLinkedinName(ctx), 300)
+        setTimeout(() => injectLinkedinName(ctx), 500)
       });
 
       obs.observe(
