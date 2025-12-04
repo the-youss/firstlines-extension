@@ -50,63 +50,67 @@ const isLinkedinProfileNamePage = () => /^\/feed/.test(window.location.pathname)
 
 const tag = 'fl-lk-name'
 
-export const injectLinkedinName = async (ctx: ContentScriptContext) => {
+export const injectLinkedinName = async (ctx: ContentScriptContext, node?: HTMLElement) => {
 
 
   if (!isLinkedinProfileNamePage()) return;
 
 
-  const elements = document.querySelectorAll(SELECTOR);
-  console.log('elements', elements)
-  for (const element of elements) {
-    // double-check before inserting
-    if (element.querySelector(tag)) {
-      continue
-    } else {
-      const ui = await createShadowRootUi(ctx, {
-        position: "inline",
-        name: 'fl-lk-name',
-        anchor: element,
-        onMount(container) {
-          const appContainer = document.createElement("span");
-          appContainer.id = "fl_lk_name_root";
-          container.appendChild(appContainer);
-
-          const root = ReactDOM.createRoot(appContainer);
-          root.render(<LinkedinProfileName container={appContainer} />);
-          return root;
-        },
-        onRemove(root) {
-          root?.unmount();
-        },
-      });
-
-      ui.mount();
-    }
+  const element = node ?? document.querySelector(SELECTOR);
+  console.log('elements', element)
+  if (element?.querySelector(tag)) {
+    return
   }
+  const ui = await createShadowRootUi(ctx, {
+    position: "inline",
+    name: 'fl-lk-name',
+    anchor: element,
+    onMount(container) {
+      const appContainer = document.createElement("span");
+      appContainer.id = "fl_lk_name_root";
+      container.appendChild(appContainer);
+
+      const root = ReactDOM.createRoot(appContainer);
+      root.render(<LinkedinProfileName container={appContainer} />);
+      return root;
+    },
+    onRemove(root) {
+      root?.unmount();
+    },
+  });
+
+  ui.mount();
 };
 
 export function injectLinkedinNameObs(ctx: ContentScriptContext) {
-  // handle search results mutation reinjection
-  if (isLinkedinProfileNamePage()) {
-    const el = document.querySelector(
-      OBSERVER_SELECTOR
-    );
+  if (!isLinkedinProfileNamePage()) return;
 
-    if (el) {
-      if (obs)
-        obs.disconnect();
+  const el = document.querySelector(OBSERVER_SELECTOR);
+  if (!el) return;
 
-      obs = new MutationObserver(() => {
-        console.log('detected')
-        // We only re-inject if UI is gone
-        setTimeout(() => injectLinkedinName(ctx), 500)
-      });
+  if (obs) obs.disconnect();
 
-      obs.observe(
-        el,
-        { childList: true, }
-      );
+  obs = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (!(node instanceof HTMLElement)) continue;
+
+        // 1️⃣ The new node matches the selector
+        if (node.matches?.(SELECTOR)) {
+          injectLinkedinName(ctx, node)
+        }
+
+        // 2️⃣ Or it contains matching children
+        const matches = node.querySelectorAll?.(SELECTOR);
+        matches?.forEach((matchEl) => {
+          injectLinkedinName(ctx, matchEl as HTMLElement)
+        });
+      }
     }
-  }
+  });
+
+  obs.observe(el, {
+    childList: true,
+    subtree: true,
+  });
 }
