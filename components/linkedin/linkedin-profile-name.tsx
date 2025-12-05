@@ -5,11 +5,16 @@ import ReactDOM from "react-dom/client";
 import { ContentScriptContext } from "wxt/client";
 import { ListComboBox } from '../list-combo-box';
 import { useSingleImportLead } from '@/hooks/use-single-import-lead';
+import { ExternalLink } from 'lucide-react';
 
 const LinkedinProfileName = ({ container }: { container: HTMLElement }) => {
   const { isLoading, url, _onSelect } = useSingleImportLead(container)
   if (url) {
-    return <a href={url} target="_blank" rel="noopener noreferrer" className={'text-primary font-semibold cursor-pointer'}>Open profile</a>
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer" className={'text-primary inline-flex items-center font-semibold cursor-pointer'}>
+      <ExternalLink className='h-3'/>  Open profile
+      </a>
+    )
   }
   return (
     <ListComboBox shadowRoot={container!} onSelect={_onSelect}>

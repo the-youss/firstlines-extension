@@ -61,7 +61,7 @@ export const importSingleProfile = async (obj: { listId?: string, listName?: str
   try {
     const res = await api.importSingleProfile(obj);
     const listId = res.result.data.listId
-    const url = `${APP_URL}/app/list/${listId}`;
+    const url = `${APP_URL}/app/leads?listId=${listId}`;
     return { url }
   } catch (error: any) {
     throw new Error(error.message)
