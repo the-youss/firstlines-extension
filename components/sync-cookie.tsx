@@ -1,6 +1,7 @@
 import { Message } from "@/lib/message"
 import { storageFn } from "@/lib/storage"
-import { waitFor } from "@/lib/utils"
+import { NODE_PROCESSED_DATA_KEY, waitFor } from "@/lib/utils"
+import { throttle } from "lodash-es"
 import { createRoot } from "react-dom/client"
 import { Fragment } from "react/jsx-runtime"
 import { ContentScriptContext } from "wxt/client"
@@ -42,23 +43,22 @@ export const SyncCookie = () => {
     <Fragment />
   )
 }
-const SALES_NAV_SEARCH_SELECTOR = 'body'
+const SELECTOR = 'body'
 
-const isSalesNavSearchResultsPage = () =>
-  /^\/sales\/search\/people/.test(window.location.pathname);
 
 export const injectSyncCookie = async (ctx: ContentScriptContext) => {
-  if (!isSalesNavSearchResultsPage()) {
-    return;
-  }
-  const anchorEl = await waitFor(SALES_NAV_SEARCH_SELECTOR);
-  const existingUIs = document.querySelectorAll('fl-sync');
-  existingUIs.forEach((ui) => ui.remove());
+  console.log('[injectSyncCookie] called')
+
+  const node = document.querySelector(SELECTOR) as HTMLElement;
+
+  if (!node) return;
+  if (node.dataset[NODE_PROCESSED_DATA_KEY]) return;
+  node.dataset[NODE_PROCESSED_DATA_KEY] = "1";
 
   const ui = await createShadowRootUi(ctx, {
     name: "fl-sync",
     position: 'inline',
-    anchor: anchorEl,
+    anchor: node,
     onMount(container) {
       const appContainer = document.createElement("div");
       appContainer.id = "fl_sync";
@@ -76,3 +76,5 @@ export const injectSyncCookie = async (ctx: ContentScriptContext) => {
   })
   ui.mount();
 }
+
+export const throttledInjectSyncCookie = throttle(injectSyncCookie, 250);

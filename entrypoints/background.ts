@@ -35,7 +35,7 @@ export default defineBackground(() => {
 
   browser.webRequest.onBeforeSendHeaders.addListener(
     (details) => {
-      if (details.requestHeaders && urlsToWatch.findIndex((url) => details.url.includes(url)) != -1) {
+      if (details.requestHeaders) {
         const requestIntercept = {
           timestamp: new Date().toISOString(),
           url: details.url,

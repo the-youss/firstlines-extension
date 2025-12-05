@@ -1,6 +1,7 @@
 
 import { injectLinkedinComponents } from '@/components/linkedin';
 import { injectSalesNavComponents } from '@/components/sales-nav';
+import { throttledInjectSyncCookie } from '@/components/sync-cookie';
 import { EVENT_NAME } from '@/lib/event.name';
 import { Message } from '@/lib/message';
 import { storageFn } from '@/lib/storage';
@@ -24,10 +25,12 @@ export default defineContentScript({
 const setupInjections = (ctx: ContentScriptContext) => {
 	const throttledInjectLinkedinComponents = injectLinkedinComponents(ctx);
 	const throttledInjectSalesNavComponents = injectSalesNavComponents(ctx);
+	injectSyncCookie(ctx)
 
 	const observer = new MutationObserver(() => {
 		throttledInjectLinkedinComponents()
 		throttledInjectSalesNavComponents()
+		throttledInjectSyncCookie(ctx)
 	});
 
 	observer.observe(document, {
