@@ -1,11 +1,14 @@
-import { exportSearchLeads, getLinkedinCookies, syncLinkedinSession } from "@/lib/background-fn";
+import { api } from "@/lib/api";
+import { exportSearchLeads, getLinkedinCookies, importSingleProfile, syncLinkedinSession } from "@/lib/background-fn";
 import { Message } from "@/lib/message";
 import { storageFn } from "@/lib/storage";
+import { preloadStorage } from "@/lib/use-store";
 import { urlsToWatch } from "@/lib/utils";
 
 export default defineBackground(() => {
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const MESSAGE_TYPE = (message as { type: string }).type;
+    const INPUT = (message as { input: any }).input;
     console.log('MESSAGE_TYPE', MESSAGE_TYPE);
     if (MESSAGE_TYPE === Message.exportSearchLeads) {
       exportSearchLeads().then(sendResponse).catch((error) => sendResponse({ error: error.message }))
@@ -15,6 +18,16 @@ export default defineBackground(() => {
     }
     if (MESSAGE_TYPE === Message.syncLinkedinSession) {
       syncLinkedinSession().then(sendResponse).catch((error) => sendResponse({ error: error.message }))
+    }
+
+    if (MESSAGE_TYPE === Message.fetchLists) {
+      api.getLists().then(sendResponse).catch((error) => sendResponse({ error: error.message }))
+    }
+    if (MESSAGE_TYPE === Message.importSingleProfile) {
+      importSingleProfile(INPUT).then(sendResponse).catch((error) => sendResponse({ error: error.message }))
+    }
+    if (MESSAGE_TYPE === Message.preloadStorage) {
+      preloadStorage().then(sendResponse)
     }
 
     return true;

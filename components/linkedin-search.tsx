@@ -1,8 +1,9 @@
 import '@/assets/shadcn.css';
-import { waitFor } from '@/lib/utils';
+import { NODE_PROCESSED_DATA_KEY, waitFor } from '@/lib/utils';
 import ReactDOM from "react-dom/client";
 import { ContentScriptContext } from "wxt/client";
 import { Button } from './ui/button';
+import { throttle } from 'lodash-es';
 
 const LinkedinSearch = () => {
   const _onClick = useCallback(() => {
@@ -13,7 +14,7 @@ const LinkedinSearch = () => {
 
 
   return (
-    <Button className='w-full' size='lg'>Import leads</Button>
+    <Button className='w-full mb-2' size='lg'>Import leads</Button>
 
   )
 }
@@ -23,7 +24,7 @@ const isLinkedinSearchPage = () =>
   /^\/search\/results\/[a-z]+\/?$/.test(window.location.pathname);
 const tag = 'fl-lk-search'
 
-export const injectLinkedinSearch = async (ctx: ContentScriptContext) => {
+export const _injectLinkedinSearch = async (ctx: ContentScriptContext) => {
   if (!isLinkedinSearchPage()) return;
   console.log('[injectLinkedinSearch] called')
   const isPeopleSearchPage = window.location.pathname.includes('people')
@@ -65,3 +66,44 @@ export const injectLinkedinSearch = async (ctx: ContentScriptContext) => {
 };
 
 
+
+export const injectLinkedinSearch = async (ctx: ContentScriptContext) => {
+
+  if (!isLinkedinSearchPage()) return;
+
+  console.log('[injectLinkedinSearch] called')
+  const isPeopleSearchPage = window.location.pathname.includes('people')
+  const SELECTOR = SELECTORS[isPeopleSearchPage ? 1 : 0]
+  const node = document.querySelector(SELECTOR) as HTMLElement;
+
+  if (!node) return;
+
+  if (node.dataset[NODE_PROCESSED_DATA_KEY]) return;
+  node.dataset[NODE_PROCESSED_DATA_KEY] = "1";
+
+  const ui = await createShadowRootUi(ctx, {
+    position: "inline",
+    name: tag,
+    anchor: node,
+    append(anchor, ui) {
+      anchor.prepend(ui);
+    },
+    onMount(container) {
+      const appContainer = document.createElement("span");
+      appContainer.id = "fl_lk_search_root";
+      container.appendChild(appContainer);
+
+      const root = ReactDOM.createRoot(appContainer);
+      root.render(<LinkedinSearch />);
+      return root;
+    },
+    onRemove(root) {
+      root?.unmount();
+    },
+  });
+
+  ui.mount();
+};
+
+
+export const throttledInjectLinkedinSearch = throttle(injectLinkedinSearch, 250);

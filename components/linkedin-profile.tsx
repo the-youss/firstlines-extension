@@ -1,47 +1,53 @@
 import '@/assets/shadcn.css';
-import { waitFor } from '@/lib/utils';
+import { cn, NODE_PROCESSED_DATA_KEY, waitFor } from '@/lib/utils';
 import ReactDOM from "react-dom/client";
 import { ContentScriptContext } from "wxt/client";
-import { Button } from './ui/button';
-import { ComboBox } from './ui/combo-box';
-const options = [
-  {
-    value: "backlog",
-    label: "Backlog",
-  },
-  {
-    value: "todo",
-    label: "Todo",
-  },
-  {
-    value: "in progress",
-    label: "In Progress",
-  },
-  {
-    value: "done",
-    label: "Done",
-  },
-  {
-    value: "canceled",
-    label: "Canceled",
-  },
-]
+import { Button, buttonVariants } from './ui/button';
+import { ListComboBox } from './list-combo-box';
+import { throttle } from 'lodash-es';
+import { Message } from '@/lib/message';
+
 const LinkedinProfile = ({ container }: { container: HTMLElement }) => {
-  const _onClick = useCallback(() => {
-    browser.runtime.sendMessage({
-      type: 'export-leads',
-    })
-  }, [])
+  const [isLoading, setIsLoading] = useState(false);
+  const [url, setUrl] = useState('');
+  const _onSelect = useCallback(async (listId: string | 'new-list') => {
+    let listName: string = ''
+    if (listId === 'new-list') {
+      listName = window.prompt('Enter list name') || ''
+      if (!listName) return
+    }
 
+    if (!listId && !listName) return
+    const profileIdentifer = container.dataset.profileIdentifier || ''
+    if (!profileIdentifer) return
+    setIsLoading(true);
+    try {
+      const response: any = await browser.runtime.sendMessage({
+        type: Message.importSingleProfile,
+        input: {
+          listId,
+          listName,
+          source: 'linkedin_search',
+          identifier: profileIdentifer,
+        }
+      })
+      setUrl(response.url);
+    } catch (error) {
+      setUrl('')
+    } finally {
+      setIsLoading(false);
+    }
+  }, [container])
 
+  if (url) {
+    return <a href={url} target="_blank" rel="noopener noreferrer" className={cn(buttonVariants({ className: "rounded-2xl" }))}>Open profile</a>
+  }
   return (
-    <ComboBox options={options} shadowRoot={container!}>
-      {({ selectedOption }) => (
-        <span>
-          <Button className='rounded-2xl'>Import lead</Button>
-        </span>
-      )}
-    </ComboBox>
+    <ListComboBox shadowRoot={container!} onSelect={_onSelect}>
+      <span>
+        <Button className='rounded-2xl' disabled={isLoading}>{isLoading ? 'Please wait...' : 'Import lead'}</Button>
+      </span>
+    </ListComboBox>
 
   )
 }
@@ -52,7 +58,7 @@ const isLinkedinProfilePage = () =>
 
 const tag = 'fl-lk-profile'
 
-export const injectLinkedinProfile = async (ctx: ContentScriptContext) => {
+export const _injectLinkedinProfile = async (ctx: ContentScriptContext) => {
   if (!isLinkedinProfilePage()) return;
   console.log('[injectLinkedinProfile] called')
   await waitFor(SELECTOR);
@@ -91,3 +97,38 @@ export const injectLinkedinProfile = async (ctx: ContentScriptContext) => {
 };
 
 
+
+export const injectLinkedinProfile = async (ctx: ContentScriptContext) => {
+  if (!isLinkedinProfilePage()) return;
+
+  console.log('[injectLinkedinProfile] called')
+  const elements = document.querySelectorAll(SELECTOR);
+  const node = (elements.length > 0 ? elements[1] : null)?.parentElement?.parentElement as HTMLElement;
+
+  if (!node) return;
+
+  if (node.dataset[NODE_PROCESSED_DATA_KEY]) return;
+  node.dataset[NODE_PROCESSED_DATA_KEY] = "1";
+  const ui = await createShadowRootUi(ctx, {
+    position: "inline",
+    name: tag,
+    anchor: node,
+    onMount(container) {
+      const appContainer = document.createElement("span");
+      appContainer.id = "fl_lk_profile_root";
+      appContainer.dataset.profileIdentifier = window.location.pathname?.split('/in/')?.pop()?.replace('/', '') || ''
+      container.appendChild(appContainer);
+
+      const root = ReactDOM.createRoot(appContainer);
+      root.render(<LinkedinProfile container={appContainer} />);
+      return root;
+    },
+    onRemove(root) {
+      root?.unmount();
+    },
+  });
+
+  ui.mount();
+};
+
+export const throttledInjectLinkedinProfile = throttle(injectLinkedinProfile, 250);

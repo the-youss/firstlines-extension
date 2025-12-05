@@ -1,44 +1,23 @@
 import '@/assets/shadcn.css';
+import { NODE_PROCESSED_DATA_KEY, waitFor } from '@/lib/utils';
+import { throttle } from 'lodash-es';
 import ReactDOM from "react-dom/client";
 import { ContentScriptContext } from "wxt/client";
-import { ComboBox } from './ui/combo-box';
-import { waitFor } from '@/lib/utils';
-const options = [
-  {
-    value: "backlog",
-    label: "Backlog",
-  },
-  {
-    value: "todo",
-    label: "Todo",
-  },
-  {
-    value: "in progress",
-    label: "In Progress",
-  },
-  {
-    value: "done",
-    label: "Done",
-  },
-  {
-    value: "canceled",
-    label: "Canceled",
-  },
-]
+import { ListComboBox } from './list-combo-box';
+
 const LinkedinProfileName = ({ container }: { container: HTMLElement }) => {
-  const _onClick = useCallback(() => {
-    browser.runtime.sendMessage({
-      type: 'export-leads',
-    })
+  const _onSelect = useCallback((listId: string | 'new-list') => {
+    let listName: string = ''
+    if (listId === 'new-list') {
+      listName = window.prompt('Enter list name') || ''
+    }
   }, [])
 
 
   return (
-    <ComboBox options={options} shadowRoot={container!}>
-      {({ selectedOption }) => (
-        <span className='text-primary font-semibold cursor-pointer'>Import lead</span>
-      )}
-    </ComboBox>
+    <ListComboBox shadowRoot={container!} onSelect={_onSelect}>
+      <span className='text-primary font-semibold cursor-pointer'>Import lead</span>
+    </ListComboBox>
 
   )
 }
@@ -117,6 +96,39 @@ function injectLinkedinNameObs(ctx: ContentScriptContext) {
 
 
 export async function injectLinkedinName(ctx: ContentScriptContext) {
-  await _injectLinkedinName(ctx)
-  injectLinkedinNameObs(ctx)
+  // await _injectLinkedinName(ctx)
+  // injectLinkedinNameObs(ctx)
+  if (!isLinkedinProfileNamePage()) return;
+  console.log('[injectLinkedinName] called')
+  const nodes = Array.from<HTMLElement>(
+    document.querySelectorAll(SELECTOR)
+  );
+
+  nodes.forEach(async (node) => {
+    if (node.dataset[NODE_PROCESSED_DATA_KEY]) return;
+    node.dataset[NODE_PROCESSED_DATA_KEY] = "1";
+
+    const ui = await createShadowRootUi(ctx, {
+      position: "inline",
+      name: tag,
+      anchor: node,
+      onMount(container) {
+        const appContainer = document.createElement("span");
+        appContainer.id = "fl_lk_name_root";
+        container.appendChild(appContainer);
+
+        const root = ReactDOM.createRoot(appContainer);
+        root.render(<LinkedinProfileName container={appContainer} />);
+        return root;
+      },
+      onRemove(root) {
+        root?.unmount();
+      },
+    });
+
+    ui.mount();
+
+  })
 }
+
+export const throttledInjectLinkedinName = throttle(injectLinkedinName, 250);

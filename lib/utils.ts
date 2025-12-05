@@ -56,3 +56,6 @@ export function waitFor(selector: string, all?: boolean): Promise<Element | Node
     obs.observe(document.body, { childList: true, subtree: true });
   });
 }
+
+
+export const NODE_PROCESSED_DATA_KEY = 'FL_PROCESSED'

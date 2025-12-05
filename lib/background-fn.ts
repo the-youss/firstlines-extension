@@ -54,3 +54,15 @@ export const syncLinkedinSession = async () => {
     throw new Error(error.message)
   }
 }
+
+
+export const importSingleProfile = async (obj: { listId?: string, listName?: string, source: 'sales_nav' | 'linkedin_search', identifier: string }) => {
+  try {
+    const res = await api.importSingleProfile(obj);
+    const listId = res.result.data.listId
+    const url = `${APP_URL}/app/list/${listId}`;
+    return { url }
+  } catch (error: any) {
+    throw new Error(error.message)
+  }
+}

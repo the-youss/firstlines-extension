@@ -61,6 +61,18 @@ export const api = {
       method: 'POST',
       json: obj,
     }))
+  },
+  getLists: async () => {
+    return catchError<Array<{ id: string, name: string }>>(() => _fetch('extension.getLists', {
+      method: 'GET',
+    }))
+  },
+
+  importSingleProfile: async (obj: { listId?: string, listName?: string, source: 'sales_nav' | 'linkedin_search', identifier: string }) => {
+    return catchError<{ listId: string }>(() => _fetch('extension.importSingleProfile', {
+      method: 'POST',
+      json: obj,
+    }))
   }
 }
 

@@ -16,6 +16,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Plus } from "lucide-react"
+import { useStore } from "@/lib/use-store"
 
 type Status = {
   value: string
@@ -29,33 +31,41 @@ type Option = {
   label: string
 }
 interface ComboBoxProps {
-  options: Array<Option>;
   shadowRoot?: ShadowRoot | HTMLElement;
-  children: ({ selectedOption }: { selectedOption?: Option }) => React.ReactNode
+  children: React.ReactNode
+  onSelect: (listId: string | 'new-list') => void
+
 }
-export function ComboBox({ children, options, shadowRoot }: ComboBoxProps) {
+export function ListComboBox({ children, shadowRoot, onSelect }: ComboBoxProps) {
   const [open, setOpen] = React.useState(false)
-  const [selected, setSelected] = React.useState<Option>()
+  const { lists, refetchLists } = useStore();
+  const options = lists.data.map(l => ({ label: l.name, value: l.id }))
+
+  useEffect(() => {
+    refetchLists()
+  }, [refetchLists])
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        {children({ selectedOption: selected })}
+        {children}
       </PopoverTrigger>
       <PopoverContent container={shadowRoot} className="p-0" side="bottom" align="start" >
         <Command>
           <CommandInput placeholder="Change status..." />
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup>
+            <CommandGroup heading="Where do you want to save this lead?">
+              <CommandItem onSelect={() => { onSelect('new-list'); setOpen(false) }}>
+                <Plus />
+                <span>New list</span>
+              </CommandItem>
               {options.map((status) => (
                 <CommandItem
                   key={status.value}
                   value={status.value}
                   onSelect={(value) => {
-                    setSelected(
-                      options.find((priority) => priority.value === value)
-                    )
+                    onSelect(value)
                     setOpen(false)
                   }}
                 >
