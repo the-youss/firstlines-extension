@@ -11,7 +11,7 @@ export default defineBackground(() => {
     const INPUT = (message as { input: any }).input;
     console.log('MESSAGE_TYPE', MESSAGE_TYPE);
     if (MESSAGE_TYPE === Message.exportSearchLeads) {
-      exportSearchLeads().then(sendResponse).catch((error) => sendResponse({ error: error.message }))
+      exportSearchLeads(INPUT).then(sendResponse).catch((error) => sendResponse({ error: error.message }))
     }
     if (MESSAGE_TYPE === Message.getLinkedinCookies) {
       getLinkedinCookies().then(sendResponse)

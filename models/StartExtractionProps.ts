@@ -7,4 +7,5 @@ export interface StartExtractionProps {
     name: string,
     value: string,
   }>
+  sourceURL: string
 }

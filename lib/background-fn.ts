@@ -12,7 +12,7 @@ export const getLinkedinCookies = async (): Promise<LinkedinCookies> => {
   ]);
   return cookies as LinkedinCookies;
 };
-export const exportSearchLeads = async () => {
+export const exportSearchLeads = async (input: Record<string, string>) => {
   const cookies = await getLinkedinCookies()
   const LK__REQUEST_HEADERS = await storageFn.get<{ headers: Array<{ name: string, value: string }> }>('__FL_LK__REQUEST_HEADERS')
   const LK__REQUEST = await storageFn.get<{ url: string }>('__FL_LK__REQUEST')
@@ -21,6 +21,7 @@ export const exportSearchLeads = async () => {
     cookies,
     headers: LK__REQUEST_HEADERS.headers,
     url: LK__REQUEST.url,
+    sourceURL: input.sourceURL,
   };
   if (!obj.cookies || !obj.headers || !obj.url) {
     throw new Error('Something went wrong, please refresh the page and try again')

@@ -14,6 +14,9 @@ export const SalesNavSearch = () => {
       setIsLoading(true)
       const res = await browser.runtime.sendMessage({
         type: Message.exportSearchLeads,
+        input: {
+          sourceURL: window.location.href
+        }
       })
       if (res instanceof Object && 'error' in res) {
         throw new Error(res.error as string)
