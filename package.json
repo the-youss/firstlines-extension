@@ -1,8 +1,8 @@
 {
-  "name": "@firstlines/extension",
+  "name": "FirstLines",
   "description": "FirstLines extension",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "wxt --port 9009",

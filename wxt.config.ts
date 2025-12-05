@@ -1,5 +1,5 @@
 import { defineConfig } from 'wxt';
-
+import pkg from './package.json'
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   manifestVersion: 3,
@@ -27,8 +27,9 @@ export default defineConfig({
       "storage"
     ],
     action: {},
-    name: 'Test',
-    description: 'Test',
+    name: pkg.name,
+    description: pkg.description,
+    version: pkg.version
   },
   modules: ['@wxt-dev/module-react'],
 
