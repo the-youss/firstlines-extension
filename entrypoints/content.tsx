@@ -1,8 +1,6 @@
-import { injectLinkedinProfile, throttledInjectLinkedinProfile } from '@/components/linkedin-profile';
-import { injectLinkedinName, throttledInjectLinkedinName } from '@/components/linkedin-profile-name';
-import { injectLinkedinSearch, throttledInjectLinkedinSearch } from '@/components/linkedin-search';
-import { throttledInjectSalesNavLead } from '@/components/sales-nav-lead';
-import { throttledInjectSalesNavSearch } from '@/components/sales-nav-search';
+
+import { injectLinkedinComponents } from '@/components/linkedin';
+import { injectSalesNavComponents } from '@/components/sales-nav';
 import { EVENT_NAME } from '@/lib/event.name';
 import { Message } from '@/lib/message';
 import { storageFn } from '@/lib/storage';
@@ -24,19 +22,12 @@ export default defineContentScript({
 	},
 });
 const setupInjections = (ctx: ContentScriptContext) => {
-	injectLinkedinName(ctx);
-	injectLinkedinProfile(ctx);
-	injectLinkedinSearch(ctx)
+	const throttledInjectLinkedinComponents = injectLinkedinComponents(ctx);
+	const throttledInjectSalesNavComponents = injectSalesNavComponents(ctx);
 
-	injectSalesNavLead(ctx)
-	injectSalesNavSearch(ctx)
 	const observer = new MutationObserver(() => {
-		throttledInjectLinkedinName(ctx);
-		throttledInjectLinkedinProfile(ctx);
-		throttledInjectLinkedinSearch(ctx)
-
-		throttledInjectSalesNavLead(ctx);
-		throttledInjectSalesNavSearch(ctx)
+		throttledInjectLinkedinComponents()
+		throttledInjectSalesNavComponents()
 	});
 
 	observer.observe(document, {

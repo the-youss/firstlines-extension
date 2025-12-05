@@ -2,7 +2,7 @@ import '@/assets/shadcn.css';
 import { NODE_PROCESSED_DATA_KEY, waitFor } from '@/lib/utils';
 import ReactDOM from "react-dom/client";
 import { ContentScriptContext } from "wxt/client";
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { throttle } from 'lodash-es';
 
 const LinkedinSearch = () => {

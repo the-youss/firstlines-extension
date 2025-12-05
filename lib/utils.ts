@@ -59,3 +59,5 @@ export function waitFor(selector: string, all?: boolean): Promise<Element | Node
 
 
 export const NODE_PROCESSED_DATA_KEY = 'FL_PROCESSED'
+
+export const NODE_PROFILE_IDENTIFIER_KEY = 'FL_PROFILE_IDENTIFIER'
